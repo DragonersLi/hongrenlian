@@ -1,0 +1,18 @@
+[2018-07-17 05:42:31] production.ERROR: Class 'Dotenv\Dotenv' not found {"exception":"[object] (Symfony\\Component\\Debug\\Exception\\FatalThrowableError(code: 0): Class 'Dotenv\\Dotenv' not found at /data/www/hrapi/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/LoadEnvironmentVariables.php:27)
+[stacktrace]
+#0 /data/www/hrapi/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(213): Illuminate\\Foundation\\Bootstrap\\LoadEnvironmentVariables->bootstrap(Object(Illuminate\\Foundation\\Application))
+#1 /data/www/hrapi/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(162): Illuminate\\Foundation\\Application->bootstrapWith(Array)
+#2 /data/www/hrapi/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(146): Illuminate\\Foundation\\Http\\Kernel->bootstrap()
+#3 /data/www/hrapi/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(116): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+#4 /data/www/hrapi/public/index.php(55): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#5 {main}
+"} 
+[2018-07-17 05:42:37] production.ERROR: Class 'Dotenv\Dotenv' not found {"exception":"[object] (Symfony\\Component\\Debug\\Exception\\FatalThrowableError(code: 0): Class 'Dotenv\\Dotenv' not found at /data/www/hrapi/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/LoadEnvironmentVariables.php:27)
+[stacktrace]
+#0 /data/www/hrapi/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(213): Illuminate\\Foundation\\Bootstrap\\LoadEnvironmentVariables->bootstrap(Object(Illuminate\\Foundation\\Application))
+#1 /data/www/hrapi/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(162): Illuminate\\Foundation\\Application->bootstrapWith(Array)
+#2 /data/www/hrapi/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(146): Illuminate\\Foundation\\Http\\Kernel->bootstrap()
+#3 /data/www/hrapi/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(116): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+#4 /data/www/hrapi/public/index.php(55): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#5 {main}
+"} 
