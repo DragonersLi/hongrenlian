@@ -26,7 +26,7 @@ class SyncController extends ApiBaseController
         }
     }
     //同步用户
-    public function user(Request $request)
+    public function test(Request $request)
     {
         if($this->sync_user){//如果没关闭则执行代码
             file_put_contents("hello.txt",date('Y-m-d H:i:s')."\n\r",FILE_APPEND);//执行的动作
