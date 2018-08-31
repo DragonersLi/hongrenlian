@@ -24,9 +24,10 @@
 			<div class="app-desc">
 				<p>紅人链是基于区块链技术构建的粉丝经济流量转化平台，独有的投票，众筹，商城，社交等线上版块将以红人粉丝经济流量为基础，打造全球粉丝经济生态圈，独有的区块链技术构建的社群流量模型有效的融合社交电商和社交游戏，打造全新的区块链B2C流量平台。</p>
 			</div>
-			<a class="tip-a" href="./iosTip.html">IOS安装教程</a>
+			<!-- <a class="tip-a" href="./iosTip.html">IOS安装教程</a> -->
 			<div class="download-btn" onclick="fnDownload()">客户端下载</div>
 		</div>
+		<a class="ios-download-tip" href="./iosTip.html">IOS安装教程</a>
 	</div>
 	<div class="modal-box">
 		<img class="wxTip ios-tip" src="../images/ios.png" alt="">
@@ -37,7 +38,7 @@
 <script>
 	$(function(){
 		if (navigator.userAgent.match(/(iPhone|iPod|iPad);?/i)) {
-            $('.tip-a').css({'display':'block'});
+            $('.ios-download-tip').css({'display':'block'});
         }
 	})
 	function isWeiXin(){//判断微信

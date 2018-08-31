@@ -121,8 +121,7 @@ class OrderController extends ApiBaseController
         if(!$goods->goods_type){//虚拟商品订单
             if($order['pay_status'] && $order['order_status']){	//支付的订单有核销
                 $writeOffModel = $this->orderWriteOffModel->where(['order_id'=>$order_id])->first();
-                $data['order_writeoff']['id'] = $writeOffModel->id;
-                $data['order_writeoff']['order_serial'] = substr($writeOffModel->order_id,-8);
+                $data['order_writeoff']['order_serial'] = $writeOffModel->order_serial;
                 $data['order_writeoff']['order_code'] = $writeOffModel->order_code;
                 $data['order_writeoff']['qrcode_img'] = $this->base_url.$writeOffModel->qrcode_img;
                 $data['order_writeoff']['is_writeoff'] = $writeOffModel->is_writeoff;
@@ -309,23 +308,23 @@ class OrderController extends ApiBaseController
                 $order_status =  2;
                 $message = "您的订单号{$order->order_id}成功支付红人圈{$order->total_score}，我们已为您发货，请及时确认收货！";
 
+
                 $time = time();
                 $url = "/upload/image/qrcode/".$user->id.'_'.$time.".png";#注意目录可写
-                $qrcode['user_id'] = $user->id;#用户id
-                $qrcode['mobile'] = $user->mobile;#手机号
-                $qrcode['order_id'] = $order->order_id;#订单号
-                $qrcode['order_serial'] = substr($order->order_id,-8);//核销序列号
-                $qrcode['order_code'] = !empty($user->mobile)?substr($user->mobile,-8):substr($time,-8);//核销密码
-                $qrcode['create_time'] = $time;#创建时间
-
-                generateQrcode(200,$qrcode,$url);#生成二维码
-
                 $write_data['order_id'] = $order->order_id;#订单号
-                $write_data['order_code'] = $qrcode['order_code'];//核销密码
+                $write_data['order_code'] = !empty($user->mobile)?substr($user->mobile,-8):substr($order->order_id,-8);//核销密码
                 $write_data['qrcode_img'] = $url;//核销二维码
                 $write_data['is_writeoff'] = 0;//未核销
                 $write_data['create_time'] = $time;#创建时间
-                $this->orderWriteOffModel->insert($write_data);#生成核销
+                $order_serial = $this->orderWriteOffModel->insertGetId($write_data);#生成核销
+
+                $qrcode['user_id'] = $user->id;#用户id
+                $qrcode['mobile'] = $user->mobile;#手机号
+                $qrcode['order_id'] = $order->order_id;#订单号
+                $qrcode['order_serial'] = $order_serial;//核销序列号
+                $qrcode['order_code'] = $write_data['order_code'];//核销密码
+                $qrcode['create_time'] = $time;#创建时间
+                generateQrcode(200,$qrcode,$url);#生成二维码
             }
             MessageModel::addMessage($user->id, "兑换商品红人圈支出", $message);
             $this->orderModel->where(['order_id'=>$order->order_id])->update(['pay_status'=>1,'order_status'=>$order_status,'pay_time'=>time()]);
@@ -416,9 +415,9 @@ class OrderController extends ApiBaseController
 
     //订单核销
     public function writeOff(Request $request){
-        $data = $request->only('user_id','order_id','order_serial','order_code');
+        $data = $request->only('user_id','order_serial','order_code');
 
-        if(empty($data['user_id']) || empty($data['order_id']) || empty($data['order_serial']) || empty($data['order_code']) || (substr($data['order_id'],-8)!= $data['order_serial'])){
+        if(empty($data['user_id']) || empty($data['order_serial']) || empty($data['order_code'])){
             return response()->json(['msg'=>Msg::getMsg(Msg::$err_noParameter),'code'=>Msg::$err_noParameter]);
         }
         $user = $this->usersModel->where(['id'=>$data['user_id'],'is_businesser'=>1,'status'=>1])->first();
@@ -428,7 +427,7 @@ class OrderController extends ApiBaseController
         $res = $this->orderWriteOffModel
             ->join('orders','orders.order_id','orders_writeoff.order_id')
             ->select('orders.total_score','orders_writeoff.*')
-            ->where(['orders_writeoff.order_id'=>$data['order_id'],'order_code'=>$data['order_code']])->first();
+            ->where(['orders_writeoff.order_serial'=>$data['order_serial'],'order_code'=>$data['order_code']])->first();
         if(empty($res)){//核销订单不存在
             return response()->json(['msg'=>Msg::getMsg(Msg::$err_noOrder),'code'=>Msg::$err_noOrder]);
         }
@@ -439,7 +438,7 @@ class OrderController extends ApiBaseController
         $write_data['user_id'] = $data['user_id'];
         $write_data['is_writeoff'] = 1;
         $write_data['update_time'] = time();
-        $result = $this->orderWriteOffModel->where(['id'=>$res->id])->update($write_data);
+        $result = $this->orderWriteOffModel->where(['order_serial'=>$res->order_serial])->update($write_data);
         if($result){
             return response()->json(['msg'=>Msg::getMsg(Msg::$err_none),'code'=>Msg::$err_none,'result'=>['total_score'=>$res->total_score]]);
         }else{

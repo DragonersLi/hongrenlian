@@ -51,15 +51,29 @@ img{
 	background: url("../images/downloadBg.png") center no-repeat;
 	background-size: 100% 100%;
 }
-.tip-a{
+/*.tip-a{
 	display: none;
 	position: absolute;
 	right: 0.5rem;
 	bottom: 0.06rem;
 	line-height: 0.36rem;
 	text-align: right;
-	font-size: 0.24rem;
+	font-size: 0.3rem;
 	color: #ccc;
+}*/
+.ios-download-tip{
+	display: none;
+	position: fixed;
+	top:0.55rem;
+	right: 0;
+	width: 2.14rem;
+	height: 0.58rem;
+	line-height: 0.58rem;
+	font-size: 0.28rem;
+	text-align: center;
+	background: #D32D35;
+	color: #fff;
+	border-radius: 0.58rem 0 0 0.58rem;
 }
 
 /*弹窗*/
