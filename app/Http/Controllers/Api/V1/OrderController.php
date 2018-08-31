@@ -119,6 +119,7 @@ class OrderController extends ApiBaseController
         $goods = $this->goodsModel->where(['goods_id'=>$order['goods_id']])->first();
 		$data['order_writeoff'] = [];
 		if(!$goods->goods_type){//虚拟商品订单
+ 
 			if($order['pay_status'] && $order['order_status']){	//支付的订单有核销		
 				$writeOffModel = $this->orderWriteOffModel->where(['order_id'=>$order_id])->first();
 				$data['order_writeoff']['id'] = $writeOffModel->id;
@@ -129,7 +130,8 @@ class OrderController extends ApiBaseController
 				$data['order_writeoff']['create_time'] = $writeOffModel->create_time;
 				$data['order_writeoff']['update_time'] = $writeOffModel->update_time;
 
-			}			
+			}			 
+ 
 		}
         $data['goods_id'] = $goods['goods_id'];
         $data['goods_type'] = $goods['goods_type'];
