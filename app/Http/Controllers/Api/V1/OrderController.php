@@ -15,7 +15,7 @@ use App\Models\Admin\OrderWriteOffModel;
 use App\Models\Admin\UsersModel;
 use App\Models\Admin\AddressModel;
 use App\Models\Admin\RegionModel;
-use App\Models\Admin\MessageModel as MessageModel;
+use App\Models\Admin\MessageModel;
 use App\Models\Admin\FinanceModel;
 
 class OrderController extends ApiBaseController
@@ -119,14 +119,17 @@ class OrderController extends ApiBaseController
         $goods = $this->goodsModel->where(['goods_id'=>$order['goods_id']])->first();
 		$data['order_writeoff'] = [];
 		if(!$goods->goods_type){//虚拟商品订单
-			$writeOffModel = $this->orderWriteOffModel->where(['order_id'=>$order_id])->first();
-			$data['order_writeoff']['id'] = $writeOffModel->id;
-			$data['order_writeoff']['order_serial'] = substr($writeOffModel->order_id,-8);
-			$data['order_writeoff']['order_code'] = $writeOffModel->order_code;
-			$data['order_writeoff']['qrcode_img'] = $this->base_url.$writeOffModel->qrcode_img; 
-			$data['order_writeoff']['is_writeoff'] = $writeOffModel->is_writeoff;
-			$data['order_writeoff']['create_time'] = $writeOffModel->create_time;
-			$data['order_writeoff']['update_time'] = $writeOffModel->update_time;   
+			if($order['pay_status'] && $order['order_status']){	//支付的订单有核销		
+				$writeOffModel = $this->orderWriteOffModel->where(['order_id'=>$order_id])->first();
+				$data['order_writeoff']['id'] = $writeOffModel->id;
+				$data['order_writeoff']['order_serial'] = substr($writeOffModel->order_id,-8);
+				$data['order_writeoff']['order_code'] = $writeOffModel->order_code;
+				$data['order_writeoff']['qrcode_img'] = $this->base_url.$writeOffModel->qrcode_img; 
+				$data['order_writeoff']['is_writeoff'] = $writeOffModel->is_writeoff;
+				$data['order_writeoff']['create_time'] = $writeOffModel->create_time;
+				$data['order_writeoff']['update_time'] = $writeOffModel->update_time;
+
+			}			
 		}
         $data['goods_id'] = $goods['goods_id'];
         $data['goods_type'] = $goods['goods_type'];
