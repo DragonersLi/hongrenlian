@@ -17,4 +17,14 @@ class OrderModel extends Authenticatable
         return empty($res) ? $order_id : self::getOrderId();
     }
 
+    public static function getOneOrderId($order_id){
+        $res = self::where(['order_id'=>$order_id])->first();
+        return $res;
+    }
+
+    //发货  修改订单
+    public static function updateOneOrder($order_id,$data){
+        $res = self::where(['order_id'=> $order_id])->update($data);
+        return $res;
+    }
 }

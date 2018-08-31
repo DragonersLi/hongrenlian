@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=9; IE=8; IE=7; IE=EDGE"/>
+	<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<title>红人链</title>
+	<link rel="stylesheet" type="text/css" href="../css/base.css">
+	<link rel="stylesheet" type="text/css" href="../css/download.css">
+</head>
+<body>
+	<div class="download-page">
+		<div class="page-container">
+			<div class="logo-wrap">
+				<img class="red-logo" src="../images/redLogo.png">
+				<img class="app-name" src="../images/appName.png">
+			</div>
+			<div class="platform-desc-wrap">
+				<div class="platform-desc platform-desc1">基于区块链技术</div>
+				<div class="platform-desc platform-desc2">投票社交寻宝平台</div>
+			</div>
+			<div class="app-desc">
+				<p>紅人链是基于区块链技术构建的粉丝经济流量转化平台，独有的投票，众筹，商城，社交等线上版块将以红人粉丝经济流量为基础，打造全球粉丝经济生态圈，独有的区块链技术构建的社群流量模型有效的融合社交电商和社交游戏，打造全新的区块链B2C流量平台。</p>
+			</div>
+			<a class="tip-a" href="./iosTip.html">IOS安装教程</a>
+			<div class="download-btn" onclick="fnDownload()">客户端下载</div>
+		</div>
+	</div>
+	<div class="modal-box">
+		<img class="wxTip ios-tip" src="../images/ios.png" alt="">
+		<img class="wxTip android-tip" src="../images/android.png" alt="">
+	</div>
+</body>
+<script type="text/javascript" src="../js/jquery-2.1.4.min.js"></script>
+<script>
+	$(function(){
+		if (navigator.userAgent.match(/(iPhone|iPod|iPad);?/i)) {
+            $('.tip-a').css({'display':'block'});
+        }
+	})
+	function isWeiXin(){//判断微信
+	    var ua = window.navigator.userAgent.toLowerCase();
+	    if(ua.match(/MicroMessenger/i) == 'micromessenger'){//微信中打开
+	        return true;
+	    }else{
+       		return false;
+        }    
+	}
+		
+	function fnDownload(){
+		if(isWeiXin()){
+			if (navigator.userAgent.match(/(iPhone|iPod|iPad);?/i)) {
+	            $('.modal-box').css({'display':'block'});
+	            $('.ios-tip').css({'display':'block'});
+	        }
+	        else if (navigator.userAgent.match(/android/i)) {
+	        	window.location.href="./androidTip.html"
+	            // $('.modal-box').css({'display':'block'});
+	            // $('.android-tip').css({'display':'block'});
+	        }
+		}else{
+			if (navigator.userAgent.match(/(iPhone|iPod|iPad);?/i)) {
+	            // window.location.href="https://fir.im/dgwp";
+	      //       window.location.href = "XCRedLine://";
+			    // window.setTimeout(function() {
+			        window.location.href = "itms-services:///?action=download-manifest&url=https://api.hongrenlian.cn/apps/redtoken.plist";//ios下载地址
+			    // },500);
+			    
+	        }else if (navigator.userAgent.match(/android/i)) {
+	            // window.location.href="https://www.pgyer.com/nxkA";
+	            window.location.href="./androidTip.html"
+	        }
+		}
+    }
+
+</script>
+</html>

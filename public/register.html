@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=9; IE=8; IE=7; IE=EDGE"/>
+	<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<title>红人链</title>
+	<link rel="stylesheet" type="text/css" href="../css/base.css">
+	<link rel="stylesheet" type="text/css" href="../css/register.css">
+</head>
+<body>
+	<div class="download-page">
+		<div class="page-container">
+			<div class="logo-wrap">
+				<img class="red-logo" src="../images/redLogo.png">
+				<img class="app-name" src="../images/appName.png">
+			</div>
+			<div class="platform-desc-wrap">
+				<div class="platform-desc platform-desc1">基于区块链技术</div>
+				<div class="platform-desc platform-desc2">投票社交寻宝平台</div>
+			</div>
+			<ul class="form-wrap">
+				<li class="form-item">
+					<input class="form-item-cont phone" type="telephone" maxlength="11" placeholder="请输入手机号">
+				</li>
+				<li class="form-item">
+					<input class="form-item-cont form-item-cont3 smsCode" type="text" placeholder="请输入验证码">
+					<button class="send-smsCode-btn send-smsCode-btn2 hide">获取验证码</button>
+					<button class="send-smsCode-btn send-smsCode-btn3" onclick="getSmsCode()">获取验证码</button>
+				</li>
+				<li class="form-item">
+					<span class="form-item-cont">邀请码</span>
+					<span class="form-item-cont form-item-cont2 inviteCode"></span>
+				</li>
+			</ul>
+			<div class="register-btn" onclick="fnRegister()">注册领取100红人圈</div>
+			<span class="download-btn" onclick="fnGoDownLoad()">我已注册，立即下载</span>
+			<div class="toast">
+		    	<div class="toast-inner fadeInOutUp">
+		    		<span class="toast-cont"></span>
+		    	</div>
+		    </div>
+		</div>
+	</div>
+	
+</body>
+	<script type="text/javascript" src="../js/jquery-2.1.4.min.js"></script>
+	<script type="text/javascript" src="../js/base.js"></script>
+	<script type="text/javascript" src="../js/api.js"></script>
+	<script>
+		$(function(){
+			var inviteCode = getQueryString('inviteCode')
+			if(inviteCode){
+				$('.inviteCode').text(inviteCode)
+			}
+		})
+		function getSmsCode () {
+			var phone = $('.phone').val();
+			var reg = /^1[0-9]{10}$/;
+			if(phone == ''){
+				fnToast('请输入手机号码！')
+				return false;
+			}
+	      	if (!(reg.test(phone))) {
+		        fnToast('请输入正确的手机号码！')
+		        return false;
+	      	}
+			$.ajax({
+				url: baseUrl+api.SMScode+phone,
+				type: 'get',
+				dataType: 'json',
+				success: function (res) {
+					console.log(res)
+					$('.send-smsCode-btn3').hide();
+					$('.send-smsCode-btn2').show();
+					var index = 150;
+				    var t = setInterval(function () {
+			            index--;
+			            $('.send-smsCode-btn2').text(index + 's');
+			            if (index <= 0) {
+			              clearInterval(t);
+			              $('.send-smsCode-btn2').hide();
+						  $('.send-smsCode-btn3').show();
+			            }
+			          }, 1000)
+				},
+				fail: function (err) {
+				    alert(err)
+				}
+			})
+		}
+
+		function fnRegister () {
+			var phone = $('.phone').val();
+			var smsCode = $('.smsCode').val();
+			var inviteCode = '';
+			var reg = /^1[0-9]{10}$/;
+			if(phone == ''){
+				fnToast('请输入手机号码！')
+				return false;
+			}
+	      	if (!(reg.test(phone))) {
+		        fnToast('请输入正确的手机号码！')
+		        return false;
+	      	}
+	      	if(smsCode == ''){
+				fnToast('请输入手机号码！')
+				return false;
+	      	}
+	      	if($('.inviteCode').text() !== ''){
+				inviteCode = $('.inviteCode').text();
+	      	}
+			$.ajax({
+				url: baseUrl+api.phoneLogin,
+				type: 'post',
+				dataType: 'json',
+				data:{
+					mobile: phone,
+      				sms_code: smsCode,
+      				invite_code: inviteCode
+				},
+				success: function (res) {
+				    console.log(res)
+				    fnToast('注册成功！')
+				    window.setTimeout(function() {
+				        fnGoDownLoad();
+				    },1000);
+				    
+				},
+				fail: function (err) {
+				    alert(err)
+				}
+			})
+		}
+		function fnGoDownLoad () {
+			window.location.href = "https://api.hongrenlian.cn/download.html";
+		}
+		function fnToast(txt){
+			$('.toast').show();
+			$('.toast-cont').text(txt);
+			setTimeout(function() {  
+                $('.toast').hide(); 
+            },1500) 
+		}
+	</script>
+</html>

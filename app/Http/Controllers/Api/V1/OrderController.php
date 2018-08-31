@@ -9,8 +9,9 @@ use App\Models\Admin\GoodsProductsModel;
 use App\Models\Admin\GoodsSpecIndexModel;
 use App\Models\Admin\GoodsSpecModel;
 use App\Models\Admin\GoodsSpecValuesModel;
-use App\Models\Admin\OrderModel as OrderModel;
-use App\Models\Admin\OrderDetailModel as OrderDetailModel;
+use App\Models\Admin\OrderModel;
+use App\Models\Admin\OrderDetailModel;
+use App\Models\Admin\OrderWriteOffModel;
 use App\Models\Admin\UsersModel;
 use App\Models\Admin\AddressModel;
 use App\Models\Admin\RegionModel;
@@ -30,9 +31,11 @@ class OrderController extends ApiBaseController
         $this->specValuesModel = new GoodsSpecValuesModel;
         $this->orderModel = new OrderModel;
         $this->orderDetailModel = new OrderDetailModel;
+        $this->orderWriteOffModel = new OrderWriteOffModel;
         $this->usersModel = new UsersModel;
         $this->addressModel = new AddressModel;
         $this->regionModel = new RegionModel;
+        $this->financeModel = new FinanceModel;
         $this->financeModel = new FinanceModel;
     }
 
@@ -54,7 +57,7 @@ class OrderController extends ApiBaseController
             ->whereRaw($where)
             ->orderBy('orders.order_id','desc')
             ->paginate($size)->toArray();
-        $result = ['data'=>[]];
+		$result = ['data'=>[]];
         if(!empty($data['data'])){
             foreach($data['data'] as $k=>$v){
                 $order[$k]['order_id'] = (string)$v['order_id'];
@@ -66,23 +69,23 @@ class OrderController extends ApiBaseController
                 $order[$k]['title'] = $v['title'];
                 $order[$k]['goods_id'] = $v['goods_id'];
                 $order[$k]['indexpic'] = $this->base_url.$v['indexpic'];
-
+       
                 $order[$k]['create_time'] = $v['create_time'];
-                if(!$v['pay_status']){//未支付 关闭时间
-                    $order[$k]['close_time'] = $this->order_close_time;
-                }
-                if($v['order_status'] ==2){//待收货，自动确认收货
-                    $order[$k]['close_time'] = $this->order_sure_time;
-                }
-                $order[$k]['spec_index'] =[];
-                if($v['product_id']){//商品有规格
-                    $product = $this->productModel->where(['product_id'=>$v['product_id']])->first();
-                    if(!empty($product->spec_index)){
-                        $spec_index = unserialize($product->spec_index);
-                        is_array($spec_index) && $order[$k]['spec_index'] = $spec_index;
-                    }
-
-                }
+				if(!$v['pay_status']){//未支付 关闭时间	
+					$order[$k]['close_time'] = $this->order_close_time;
+				} 
+				if($v['order_status'] ==2){//待收货，自动确认收货
+					$order[$k]['close_time'] = $this->order_sure_time;
+				} 
+				$order[$k]['spec_index'] =[];
+				if($v['product_id']){//商品有规格
+					$product = $this->productModel->where(['product_id'=>$v['product_id']])->first();   
+					if(!empty($product->spec_index)){
+						$spec_index = unserialize($product->spec_index); 
+						is_array($spec_index) && $order[$k]['spec_index'] = $spec_index;  
+					} 
+					
+				}
 
             }
             $result =[
@@ -93,7 +96,7 @@ class OrderController extends ApiBaseController
                 'last'=>$data['last_page'],
                 'data'=>$order,
             ];
-        }
+        } 
         return response()->json(['msg'=>Msg::getMsg(Msg::$err_none),'code'=>Msg::$err_none,'result'=>$result]);
     }
 
@@ -114,6 +117,17 @@ class OrderController extends ApiBaseController
 
         $order = $order->toArray();
         $goods = $this->goodsModel->where(['goods_id'=>$order['goods_id']])->first();
+		$data['order_writeoff'] = [];
+		if(!$goods->goods_type){//虚拟商品订单
+			$writeOffModel = $this->orderWriteOffModel->where(['order_id'=>$order_id])->first();
+			$data['order_writeoff']['id'] = $writeOffModel->id;
+			$data['order_writeoff']['order_serial'] = substr($writeOffModel->order_id,-8);
+			$data['order_writeoff']['order_code'] = $writeOffModel->order_code;
+			$data['order_writeoff']['qrcode_img'] = $this->base_url.$writeOffModel->qrcode_img; 
+			$data['order_writeoff']['is_writeoff'] = $writeOffModel->is_writeoff;
+			$data['order_writeoff']['create_time'] = $writeOffModel->create_time;
+			$data['order_writeoff']['update_time'] = $writeOffModel->update_time;   
+		}
         $data['goods_id'] = $goods['goods_id'];
         $data['goods_type'] = $goods['goods_type'];
 
@@ -128,19 +142,19 @@ class OrderController extends ApiBaseController
             }
 
         }
-        if(!$order['order_status']){//未支付 关闭时间
-            $data['close_time'] = $this->order_close_time;
-        }
-        if($order['order_status'] ==2){//待收货，自动确认收货
-            $data['close_time'] = $this->order_sure_time;
-        }
-        $data['order_id'] = (string)$order['order_id'];
+		if(!$order['order_status']){//未支付 关闭时间	
+			$data['close_time'] = $this->order_close_time;
+		} 
+		if($order['order_status'] ==2){//待收货，自动确认收货
+			$data['close_time'] = $this->order_sure_time;
+		} 
+		$data['order_id'] = (string)$order['order_id'];
         $data['title'] = $order['title'];
         $data['indexpic'] = $this->base_url.$order['indexpic'];
         $data['number'] = $order['number'];
         $data['score'] = $order['score'];
         $data['total_score'] = $order['total_score'];
-        $data['order_status'] = $order['order_status'];
+        $data['order_status'] = $order['order_status']; 
         $data['create_time'] = $order['create_time'];
         $data['pay_time'] = $order['pay_time'];
         $data['wuliu_name'] = $order['wuliu_name'];
@@ -157,7 +171,7 @@ class OrderController extends ApiBaseController
         try {
 
             $data = $request->only('user_id','address_id','goods_id','number','spec_index');
-            $data['spec_index'] = is_array($data['spec_index']) ? $data['spec_index'] : json_decode($data['spec_index'],true);//兼容ios传json字符串
+			$data['spec_index'] = is_array($data['spec_index']) ? $data['spec_index'] : json_decode($data['spec_index'],true);//兼容ios传json字符串
             if(empty($data['user_id']) || empty($data['goods_id']) || empty($data['number'])){
                 return response()->json(['msg'=>Msg::getMsg(Msg::$err_noParameter),'code'=>Msg::$err_noParameter]);
             }
@@ -171,46 +185,46 @@ class OrderController extends ApiBaseController
                 return response()->json(['msg'=>Msg::getMsg(Msg::$err_noGoods),'code'=>Msg::$err_noGoods]);
             }
 
-            if($goods->goods_type){//实物有收货地址
-                if(isset($data['address_id'])){
-                    $address = $this->addressModel->where(['id'=>$data['address_id'],'user_id'=>$data['user_id']])->first();
-                    if(empty($address)){//收货地址不存在
-                        return response()->json(['msg'=>Msg::getMsg(Msg::$err_noAddress),'code'=>Msg::$err_noAddress]);
+                if($goods->goods_type){//实物有收货地址
+                    if(isset($data['address_id'])){
+                        $address = $this->addressModel->where(['id'=>$data['address_id'],'user_id'=>$data['user_id']])->first();
+                        if(empty($address)){//收货地址不存在
+                            return response()->json(['msg'=>Msg::getMsg(Msg::$err_noAddress),'code'=>Msg::$err_noAddress]);
+                        }
+                        $addr = $this->regionModel->whereRaw( "id = {$address->province} or id = {$address->city} or id = {$address->area} ")->select(\DB::raw('GROUP_CONCAT(name separator " ") as receive_address'))->first();
+
+                        $order['receive_name'] = $address->receive_name;
+                        $order['receive_phone'] = $address->receive_phone;
+                        $order['receive_address'] = $addr->receive_address.' '.$address->address;
+                        $order['address_info'] = serialize(['province'=>$address->province,'city'=>$address->city,'area'=>$address->address]);
+                        $order['order_type'] = 0;
+
                     }
-                    $addr = $this->regionModel->whereRaw( "id = {$address->province} or id = {$address->city} or id = {$address->area} ")->select(\DB::raw('GROUP_CONCAT(name separator " ") as receive_address'))->first();
-
-                    $order['receive_name'] = $address->receive_name;
-                    $order['receive_phone'] = $address->receive_phone;
-                    $order['receive_address'] = $addr->receive_address.' '.$address->address;
-                    $order['address_info'] = serialize(['province'=>$address->province,'city'=>$address->city,'area'=>$address->address]);
-                    $order['order_type'] = 0;
-
+                }else{
+                    $order['order_type'] = 1;//虚拟物不需快递
                 }
-            }else{
-                $order['order_type'] = 1;//虚拟物不需快递
-            }
             if(!empty($data['spec_index'])){//商品有规格
-
-                foreach($data['spec_index'] as $k=>$v){
-                    $spec_data = $this->specIndexModel->select('product_id','spec_id','spec_value_id')->where(['goods_id'=>$data['goods_id'],'spec_id'=>$v['spec_id'],'spec_value_id'=>$v['spec_value_id']])->get()->toArray();
-
-                    foreach($spec_data as $k1=>$v1){
+                
+				foreach($data['spec_index'] as $k=>$v){
+					$spec_data = $this->specIndexModel->select('product_id','spec_id','spec_value_id')->where(['goods_id'=>$data['goods_id'],'spec_id'=>$v['spec_id'],'spec_value_id'=>$v['spec_value_id']])->get()->toArray();
+				 
+					foreach($spec_data as $k1=>$v1){
                         $spec[] = $v1['product_id'];
                     }
                 }
-                $array_count_values = array_count_values($spec);//每个值出现多少次
-
-                $product_id = array_search(max($array_count_values),$array_count_values);//查询出现最多值的key即为skuID
-
+				 $array_count_values = array_count_values($spec);//每个值出现多少次
+				 
+                 $product_id = array_search(max($array_count_values),$array_count_values);//查询出现最多值的key即为skuID
+			 
 
                 if(empty($product_id)){//根据规格找不到商品sku
                     return response()->json(['msg'=>Msg::getMsg(Msg::$err_noProduct),'code'=>Msg::$err_noProduct]);
                 }
-                $product = $this->productModel->where(['product_id'=>$product_id])->first();//当前要购买的sku
+				$product = $this->productModel->where(['product_id'=>$product_id])->first();//当前要购买的sku
                 if(empty($product)){//根据规格找不到商品sku
                     return response()->json(['msg'=>Msg::getMsg(Msg::$err_noProduct),'code'=>Msg::$err_noProduct]);
                 }
-
+ 
                 $order_detail['product_id'] =  $product_id;
                 $order_detail['score'] =  $product->product_score;
                 $now_store = $product->product_store - $product->product_sellout;//实时库存
@@ -225,7 +239,7 @@ class OrderController extends ApiBaseController
 
             }
             $order['order_id'] = OrderModel::getOrderId();
-            $order['user_id'] = $data['user_id'];
+            $order['user_id'] = $data['user_id']; 
             $order['total_score'] = $data['number'] * $order_detail['score'];
             $order['total_number'] = $data['number'];
             $order['pay_status'] = 0;//未支付
@@ -253,49 +267,66 @@ class OrderController extends ApiBaseController
             return response()->json(['msg'=>Msg::getMsg(Msg::$err_failedOrder),'code'=>Msg::$err_failedOrder]);
         }
     }
+	
+	//支付订单
+	public function pay(Request $request)
+	{
+		try {			
+        $data = $request->only('user_id','order_id'); 
 
-    //支付订单
-    public function pay(Request $request)
-    {
-        try {
-            $data = $request->only('user_id','order_id');
-
-            if(empty($data['user_id']) || empty($data['order_id'])){
-                return response()->json(['msg'=>Msg::getMsg(Msg::$err_noParameter),'code'=>Msg::$err_noParameter]);
-            }
-            $user = $this->usersModel->where(['id'=>$data['user_id']])->first();
-            if(empty($user)){//当前用户不存在
-                return response()->json(['msg'=>Msg::getMsg(Msg::$err_noUser),'code'=>Msg::$err_noUser]);
-            }
-
-            $order = $this->orderModel->where(['order_id'=>$data['order_id']])->first();
-
-            if($data['user_id'] != $order->user_id){//订单不属于该用户
-                return response()->json(['msg'=>Msg::getMsg(Msg::$err_notYourOder),'code'=>Msg::$err_notYourOder]);
-
-            }
-            if($order->pay_status){//订单已支付
-                return response()->json(['msg'=>Msg::getMsg(Msg::$err_alreadyPay),'code'=>Msg::$err_alreadyPay]);
-
-            }
-
+        if(empty($data['user_id']) || empty($data['order_id'])){
+            return response()->json(['msg'=>Msg::getMsg(Msg::$err_noParameter),'code'=>Msg::$err_noParameter]);
+        }
+        $user = $this->usersModel->where(['id'=>$data['user_id']])->first();
+        if(empty($user)){//当前用户不存在
+            return response()->json(['msg'=>Msg::getMsg(Msg::$err_noUser),'code'=>Msg::$err_noUser]);
+        }
+ 
+		$order = $this->orderModel->where(['order_id'=>$data['order_id']])->first();
+		
+		if($data['user_id'] != $order->user_id){//订单不属于该用户
+            return response()->json(['msg'=>Msg::getMsg(Msg::$err_notYourOder),'code'=>Msg::$err_notYourOder]);
+			
+		}
+		if($order->pay_status){//订单已支付
+            return response()->json(['msg'=>Msg::getMsg(Msg::$err_alreadyPay),'code'=>Msg::$err_alreadyPay]);
+			
+		}
+   
             \DB::beginTransaction();
-            $goods = $this->orderDetailModel->join('goods','goods.goods_id','orders_detail.goods_id')->where(['order_id'=>$order->order_id])->first();//订单详情表找到购买的商品id  //找到购买的商品信息
-            if(empty($goods)){
-                return response()->json(['msg'=>Msg::getMsg(Msg::$err_noGoods),'code'=>Msg::$err_noGoods]);
-            }
-
+			$goods = $this->orderDetailModel->join('goods','goods.goods_id','orders_detail.goods_id')->where(['order_id'=>$order->order_id])->first();//订单详情表找到购买的商品id  //找到购买的商品信息
+			if(empty($goods)){				
+				return response()->json(['msg'=>Msg::getMsg(Msg::$err_noGoods),'code'=>Msg::$err_noGoods]); 				 
+			}
+			
             if($goods->goods_type){//实物代发货，虚拟待收货
                 $order_status =  1;
-                MessageModel::addMessage($user->id, "兑换商品红人圈支出", "您的订单号{$order->order_id}成功支付红人圈{$order->total_score}，我们会尽快为您发货！");
-
-            }else{
+                $message = "您的订单号{$order->order_id}成功支付红人圈{$order->total_score}，我们会尽快为您发货！";
+            }else{#虚拟物品，需核销
                 $order_status =  2;
-                MessageModel::addMessage($user->id, "兑换商品红人圈支出", "您的订单号{$order->order_id}成功支付红人圈{$order->total_score}，我们已为您发货，请及时确认收货！");
+                $message = "您的订单号{$order->order_id}成功支付红人圈{$order->total_score}，我们已为您发货，请及时确认收货！";
 
+                $time = time();
+                $url = "/upload/image/qrcode/".$user->id.'_'.$time.".png";#注意目录可写
+                $qrcode['user_id'] = $user->id;#用户id
+                $qrcode['mobile'] = $user->mobile;#手机号
+                $qrcode['order_id'] = $order->order_id;#订单号
+                $qrcode['order_serial'] = substr($order->order_id,-8);//核销序列号
+                $qrcode['order_code'] = !empty($user->mobile)?substr($user->mobile,-8):substr($time,-8);//核销密码
+                $qrcode['create_time'] = $time;#创建时间
+				
+                generateQrcode(200,$qrcode,$url);#生成二维码  
+				
+				$write_data['order_id'] = $order->order_id;#订单号 
+                $write_data['order_code'] = $qrcode['order_code'];//核销密码
+                $write_data['qrcode_img'] = $url;//核销二维码
+                $write_data['is_writeoff'] = 0;//未核销
+                $write_data['create_time'] = $time;#创建时间 
+                $this->orderWriteOffModel->insert($write_data);#生成核销
             }
+            MessageModel::addMessage($user->id, "兑换商品红人圈支出", $message);
             $this->orderModel->where(['order_id'=>$order->order_id])->update(['pay_status'=>1,'order_status'=>$order_status,'pay_time'=>time()]);
-
+           
             //支出记录			
             $this->financeModel->insert([
                 'user_id' => $data['user_id'],
@@ -306,18 +337,16 @@ class OrderController extends ApiBaseController
                 'create_time'=>time()
             ]);
             $this->usersModel->where(['id'=>$user->id])->decrement('score',$order->total_score);//用户减红人圈
-            if($goods->product_id){//更新sku表库存
-                //$this->productModel->where(['product_id'=>$goods->product_id])->decrement('product_store',$order->total_number);
+            if($goods->product_id){//更新sku表库存 
                 $this->productModel->where(['product_id'=>$goods->product_id])->increment('product_sellout',$order->total_number);
-            }else{//更新商品表库存
-                //$this->goodsModel->where(['goods_id'=>$goods->goods_id])->decrement('store',$order->total_number);
+            }else{//更新商品表库存 
                 $this->goodsModel->where(['goods_id'=>$goods->goods_id])->decrement('sellout',$order->total_number);
             }
 
 
             \DB::commit();
             return response()->json(['msg'=>Msg::getMsg(Msg::$err_none),'code'=>Msg::$err_none]);
-        } catch (\Exception $e) { //dd($e->getMessage());
+        } catch (\Exception $e) {  
             \DB::rollback();
             return response()->json(['msg'=>Msg::getMsg(Msg::$err_failedPay),'code'=>Msg::$err_failedPay]);
         }
@@ -381,14 +410,73 @@ class OrderController extends ApiBaseController
 
         return response()->json(['msg'=>Msg::getMsg(Msg::$err_illegalRequest),'code'=>Msg::$err_illegalRequest]);
     }
-
-    //获取订单超时时间
-    public function getCloseOrderTime(){
-        return $this->order_close_time;
-    }
-    //获取订单自动确认时间
-    public function getSureOrderTime(){
-        return $this->order_sure_time;
-    }
+	
+	//订单核销
+	public function writeOff(Request $request){
+		$user_id = $request->user_id ?:0;
+		$order_id = $request->order_id ?:0; 
+        if(empty($user_id) || empty($order_id)){
+            return response()->json(['msg'=>Msg::getMsg(Msg::$err_noParameter),'code'=>Msg::$err_noParameter]);
+        }
+        $user = $this->usersModel->where(['id'=>$user_id])->first();
+        if(empty($user)){//当前用户不存在
+            return response()->json(['msg'=>Msg::getMsg(Msg::$err_noUser),'code'=>Msg::$err_noUser]);
+        }
+        $order = $this->orderWriteOffModel->where(['order_id'=>$order_id])->first();
+        if(empty($order)){//订单不存在
+            return response()->json(['msg'=>Msg::getMsg(Msg::$err_noOrder),'code'=>Msg::$err_noOrder]);
+        }
+		if($order->is_writeoff){//已经核销
+			return response()->json(['msg'=>Msg::getMsg(Msg::$err_alreadyWriteOff),'code'=>Msg::$err_alreadyWriteOff]);
+		}
+		$data['id'] = $order['id'];
+		$data['order_id'] = (string)$order['order_id'];
+        $data['order_code'] = $order['order_code'];
+        $data['qrcode_img'] = $this->base_url.$order['qrcode_img']; 
+        $data['is_writeoff'] = $order['is_writeoff']; 
+        $data['create_time'] = $order['create_time'];
+        $data['update_time'] = $order['update_time']; 
+        return response()->json(['msg'=>Msg::getMsg(Msg::$err_none),'code'=>Msg::$err_none,'result'=>$data]);
+		
+		
+ 	}
+	//订单核销记录
+	public function writeOffList(Request $request){
+		$user_id = $request->user_id ?:0; 
+        if(empty($user_id)){
+            return response()->json(['msg'=>Msg::getMsg(Msg::$err_noParameter),'code'=>Msg::$err_noParameter]);
+        }
+        $user = $this->usersModel->where(['id'=>$user_id])->first();
+        if(empty($user)){//当前用户不存在
+            return response()->json(['msg'=>Msg::getMsg(Msg::$err_noUser),'code'=>Msg::$err_noUser]);
+        }
+        $order = $this->orderWriteOffModel->where(['order_id'=>$order_id])->first();
+        if(empty($order)){//订单不存在
+            return response()->json(['msg'=>Msg::getMsg(Msg::$err_noOrder),'code'=>Msg::$err_noOrder]);
+        }
+		if($order->is_writeoff){//已经核销
+			return response()->json(['msg'=>Msg::getMsg(Msg::$err_alreadyWriteOff),'code'=>Msg::$err_alreadyWriteOff]);
+		}
+		$data['id'] = $order['id'];
+		$data['order_id'] = (string)$order['order_id'];
+        $data['order_code'] = $order['order_code'];
+        $data['qrcode_img'] = $this->base_url.$order['qrcode_img']; 
+        $data['is_writeoff'] = $order['is_writeoff']; 
+        $data['create_time'] = $order['create_time'];
+        $data['update_time'] = $order['update_time']; 
+        return response()->json(['msg'=>Msg::getMsg(Msg::$err_none),'code'=>Msg::$err_none,'result'=>$data]);
+		
+		
+ 	}
+	
+	
+	//获取订单超时时间
+	public function getCloseOrderTime(){
+		return $this->order_close_time;
+	}
+	//获取订单自动确认时间
+	public function getSureOrderTime(){
+		return $this->order_sure_time;
+	}
 
 }

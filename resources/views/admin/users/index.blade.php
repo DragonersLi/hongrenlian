@@ -75,6 +75,7 @@
                             <th class="hidden-sm">手机号</th>
                             <th class="hidden-md">注册时间</th>
                             <th class="hidden-md">红人圈数量</th>
+                            <th class="hidden-md">冻结红人圈数量</th>
                             <th class="hidden-md">状态</th>
                             <th data-sortable="false">操作</th>
                         </tr>
@@ -90,6 +91,7 @@
                             <th class="hidden-sm">{{$v->mobile}}</th>
                             <th class="hidden-md">{{date('Y-m-d H:i:s',$v->create_time)}}</th>
                             <th class="hidden-md">{{$v->score}}</th>
+                            <th class="hidden-md">{{$v->freeze_score}}</th>
                             <th class="hidden-md">{{$v->status ? "正常":"冻结"}}</th>
                             <th data-sortable="false">
                                 @if(Gate::forUser(auth('admin')->user())->check('admin.users.address'))
@@ -113,7 +115,11 @@
                                             </a>
                                         @endif
                                     @endif
-
+                                    @if(Gate::forUser(auth('admin')->user())->check('admin.users.edit'))
+                                        <a href="{{url('admin/users/scorelock',['id'=>$v->id])}}" class="btn btn-success">
+                                            <i class="fa"></i> 添加冻结红人圈
+                                        </a>
+                                    @endif
                             </th>
                         </tr>
                         @endforeach
