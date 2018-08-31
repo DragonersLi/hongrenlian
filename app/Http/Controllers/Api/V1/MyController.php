@@ -80,8 +80,8 @@ class MyController extends ApiBaseController
         $data['invite_count_user'] = $invite_count;//邀请人数
         $data['invite_count_score'] = $invite_count * $this->reward['invite_user'];//邀请获得红人圈
         $data['invite_code'] = uidEncode($user->id);//邀请码
-		$data['transfer'] = 1;//是否显示转账
-		$data['is_businesser'] = $user->is_businesser;//是否商家
+        $data['transfer'] = 1;//是否显示转账
+        $data['is_businesser'] = $user->is_businesser;//是否商家
         return response()->json(['msg'=>Msg::getMsg(Msg::$err_none),'code'=>Msg::$err_none,'result'=>$data]);
 
     }
@@ -225,6 +225,9 @@ class MyController extends ApiBaseController
     public function transfer(Request $request)
     {
         $data = $request->only('user_id','mobile','score');
+        if(true){//关闭转账
+            return response()->json(['msg'=>'转账功能开发中...','code'=>9999]);
+        }
         if(empty($data['user_id']) || empty($data['mobile'])|| empty($data['score'])){
             return response()->json(['msg'=>Msg::getMsg(Msg::$err_noParameter),'code'=>Msg::$err_noParameter]);
         }
