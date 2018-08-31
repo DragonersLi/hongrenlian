@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Http\Controllers\BaseController;
 use App\Models\Admin\UsersModel as usersModel;
+use Illuminate\Support\Facades\DB;
 //前台用户管理
 class UsersController extends BaseController
 {
@@ -100,6 +101,83 @@ class UsersController extends BaseController
         $data['page'] = $pages;
         return view('admin.users.address',$data);
     }
+
+
+    /**
+     * 获取添加红人圈用户信息
+     * @param Request $request->id  用户ID
+     * @return $data
+     */
+    public function scorelock(Request $request){
+        $id = $request->id ? intval($request->id) : 0;
+        if($id){
+            $data = $this->model->where(['id'=>$id])->first()->toArray();
+        }
+        return view('admin.users.scorelock',array('data'=>$data));
+    }
+
+    /**
+     * 添加冻结红人圈
+     * @param Request $request->id 用户ID
+     * @param Request $request->score 红人圈总数量
+     * @param Request $request->title  红人圈描述
+     * @return mixed
+     */
+    public function AddScorelock(Request $request){
+
+        if($request->isMethod('post')) {
+                $scorelock = array();//红人圈总类声明
+                if (!intval($request->score)) {
+                    return redirect('admin/users/scorelock/' . $request->id)->withErrors('红人圈不能为空!');
+                }
+                $scorelock['user_id'] = $request->id;
+                $scorelock['total_score'] = $request->score ? intval($request->score) :  0;
+                $scorelock['title'] = $request->title;
+                $scorelock['status'] = 0;
+                $scorelock['create_time'] = time();
+
+                //分类的插入
+                if (intval($request['attr']['keys'][0])) {
+                    try {
+                     //开启事务
+                    \DB::beginTransaction();
+                        //计算分配中的红人圈
+                    $count_keys = array('count_keys' => null);
+                    foreach ($request['attr']['keys'] as $k => $val) {
+                                $count_keys['count_keys'] += $val;
+                    }
+                    //条件通过  有分类的先插入分类
+                    if ($count_keys['count_keys'] == $request->score) {
+                     $scorelock_id =  \DB::table('scorelock')->insertGetId($scorelock);
+                     $attr = array();
+                     $attr['pid'] = $scorelock_id;//获取父ID
+                     $attr['create_time'] = time();
+                      foreach ($request['attr']['keys'] as $k => $val)
+                     {
+                                $attr['score'] = $request['attr']['keys'][$k];
+                                // 当前时间 + （当前天数*60秒*60分*24小时*天数）
+                                $attr['thaw_time'] = $request['attr']['days'][$k] ? ($request['attr']['days'][$k] * 60 * 60 * 24) : 0;
+                                $data[] = ['pid'=>$scorelock_id,'score'=>$attr['score'],'thaw_time'=>$attr['thaw_time'],'create_time'=>time()];
+                     }
+                     \DB::table('scorelock_detail')->insert($data);
+                     \DB::commit();
+                      return redirect('admin/users/index')->withSuccess('红人圈数量成功充值');
+                    } else {
+                      return redirect('admin/users/scorelock/' . $request->id)->withErrors('红人圈数量分配不合理!');
+                    }
+
+                    } catch (\Exception $e) {
+                        \DB::rollback();
+                        return redirect()->back()->withInput()->withErrors($e->getMessage());
+                    }
+
+                } else { //如果条件不成立，红人圈就变成直充
+                    \DB::table('scorelock')->insertGetId($scorelock);
+                    return redirect('admin/users/index')->withSuccess('红人圈数量成功充值');
+                }
+        }
+    }
+
     //上传图片
     public function upload(Request $request)
     {

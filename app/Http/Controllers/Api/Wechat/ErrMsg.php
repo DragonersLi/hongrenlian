@@ -76,6 +76,7 @@ class ErrMsg{
     public static $err_errorSpecIndex = 1063; 
 	public static $err_cannotTransferSelf = 1064;
     public static $err_errorTransferScore = 1065;
+	public static $err_alreadyWriteOff = 1066;
 
     public static function getMsg($code){
         $msgs = [
@@ -157,6 +158,7 @@ class ErrMsg{
             self::$err_alreadyPay => "订单已支付，请勿重复支付！",
             self::$err_failedPay => "订单支付失败！",
             self::$err_noOrder => "订单不存在！",
+            self::$err_alreadyWriteOff => "订单已核销！",
             self::$err_cannotCancelOrder => "已兑换订单不能取消！",
             self::$err_cannotDeleteOrder => "已兑换订单不能删除！",
             self::$err_cannotSureOrder => "非待收货状态的订单不能确认收货！",

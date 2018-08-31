@@ -7,7 +7,13 @@ function generateGoodsSn(){
     return $yCode[intval(date('Y')) - 2018] . strtoupper(dechex(date('m'))) . date('d') . substr(time(), -5) . substr(microtime(), 2, 5) . sprintf('%02d', rand(0, 99));
 
 }
-
+//二维码生成
+function generateQrcode($size,$data,$url){
+    $size ?:100;#大小
+    $data ?:"success";#数据
+    $url  ?:"/upload/image/qrcode/qrcode.png";#路径 颜色->color(255,0,255)
+  return  \QrCode::format('png')->size($size)->generate(json_encode($data),public_path($url));
+}
 //获取header
 function get_all_header()
 {
@@ -64,4 +70,19 @@ function uidDecode($code)
     }
     return $num;
 
+}
+
+
+//订单状态配置
+function orderstatus($status){
+   $order_status=[
+        '0'=>'待兑换',
+        '1'=>'待发货',
+        '2'=>'待收货',
+        '3'=>'已完成',
+        '4'=>'已取消',
+        '5'=> '已删除',
+        '6'=> '超时关闭',
+    ];
+    return $order_status[$status];
 }

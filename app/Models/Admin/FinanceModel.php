@@ -11,7 +11,7 @@ class FinanceModel extends Authenticatable
     protected $primaryKey = 'id'; //定义主键
     public $timestamps = false; //是否使用时间戳
 
-    //添加
+    //添加消息
     public static function addFinance($user_id=0,$type='',$number='',$note=''){
         return self::insert([
             'user_id' => $user_id,

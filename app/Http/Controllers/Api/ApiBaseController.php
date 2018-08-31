@@ -38,12 +38,12 @@ class ApiBaseController extends BaseController
 
     //红人圈随机产生范围
     public $rand_circle = [
-        'min' => 1.50,
-        'max' => 2.50
+        'min' => 0.10,
+        'max' => 0.60
     ];
 
     //每人每天最多产生红人圈
-    public $max_circle = 20;
+    public $max_circle = 5;
 
 	 //收入类型
     public $income = [

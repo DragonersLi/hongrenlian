@@ -86,7 +86,9 @@ Route::group(['prefix' => 'v1','namespace'=>'Api\V1'],function() {
         Route::post('order/create', 'OrderController@create'); //订单生成
         Route::post('order/pay', 'OrderController@pay'); //订单支付
         Route::post('order/changeStatus', 'OrderController@changeStatus'); //订单更改状态
-        Route::get('goods/getGoodsStatus/{goods_id}', 'GoodsController@getGoodsStatus')->where(['goods_id' => '[0-9]+']); //商品状态
+        Route::post('order/writeOff', 'OrderController@writeOff'); //订单核销 
+        Route::get('order/writeOffList', 'OrderController@writeOffList'); //订单核销记录
+        Route::get('goods/getGoodsStatus/{goods_id}', 'GoodsController@getGoodsStatus')->where(['goods_id' => '[0-9]+']); //商品状态		
         Route::get('collect','CollectController@index');//众筹，投票收藏列表
         Route::any('collect/my/{type?}', 'CollectController@my')->where(['type' => '[1-2]+']);//我的收藏
         Route::any('collect/myact/{type?}', 'CollectController@myact')->where(['type' => '[1-2]+']);//我参与的

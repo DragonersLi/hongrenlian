@@ -65,10 +65,10 @@
                         <tbody>
                         @foreach($data as $k=>$v)
                             <tr>
-                                <th data-sortable="false" class="hidden-sm">{{$v->order_id}}</th>
-                                <th class="hidden-sm">{{$v->order_sn}}</th>
+                                <th data-sortable="false" class="hidden-sm">{{$k+1}}</th>
+                                <th class="hidden-sm">{{$v->order_id}}</th>
                                 <th class="hidden-sm">{{$v->username}}</th>
-                                <th class="hidden-sm">{{$v->order_address}}</th>
+                                <th class="hidden-sm">{{$v->receive_address}}</th>
                                 <th class="hidden-sm">
                                     {{$orderStatus[$v->order_status]}}
                                 </th>
@@ -82,7 +82,7 @@
                                     @endif
                                     @if(Gate::forUser(auth('admin')->user())->check('admin.order.changeStatus'))
                                         @if($v->order_status == 1)
-                                            <a href="{{url('admin/order/changeStatus',['order_id'=>$v->order_id,'order_status'=>$v->order_status])}}" class="btn btn-success">
+                                            <a href="{{url('admin/order/going',['order_id'=>$v->order_id,'order_status'=>$v->order_status])}}" class="btn btn-success">
                                                 <i class="fa"></i>发货
                                             </a>
                                         @endif

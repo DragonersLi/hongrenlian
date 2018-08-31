@@ -73,7 +73,9 @@ Route::group(['middleware' => ['auth:admin', 'menu', 'authAdmin']], function () 
     Route::match(['get','post'],'users/upload', ['as' => 'admin.users.upload', 'uses' => 'UsersController@upload']);//上传头像
     Route::match(['get','post'],'users/edit/{id?}', ['as' => 'admin.users.edit', 'uses' => 'UsersController@edit'])->where(['id' => '[0-9]+']);
     Route::match(['get','post'],'users/changeStatus/{id}/{status}', ['as' => 'admin.users.changeStatus', 'uses' => 'UsersController@changeStatus'])->where(['id' => '[0-9]+','status' => '[0-2]']);
-    Route::match(['get','post'],'users/address/{uid?}', ['as' => 'admin.users.address', 'uses' => 'UsersController@address'])->where(['uid' => '[0-9]+']);;  // 收货地址列表(['goods_id' => '[0-9]+','sj' => '[0-1]']);
+    Route::match(['get','post'],'users/address/{uid?}', ['as' => 'admin.users.address', 'uses' => 'UsersController@address'])->where(['uid' => '[0-9]+']); // 收货地址列表(['goods_id' => '[0-9]+','sj' => '[0-1]']);
+    Route::match(['get','post'],'users/scorelock/{id?}', ['as' => 'admin.users.scorelock', 'uses' => 'UsersController@scorelock'])->where(['id' => '[0-9]+']); //获取红人圈基本信息
+    Route::match(['get','post'],'users/AddScorelock', ['as' => 'admin.users.AddScorelock', 'uses' => 'UsersController@AddScorelock']); //添加红人圈
     //粉丝管理路由
     Route::match(['get','post'],'fans/index', ['as' => 'admin.fans.index', 'uses' => 'FansController@index']);  //粉丝管理
     Route::match(['get','post'],'fans/upload', ['as' => 'admin.fans.upload', 'uses' => 'FansController@upload']);//上传头像
@@ -84,19 +86,23 @@ Route::group(['middleware' => ['auth:admin', 'menu', 'authAdmin']], function () 
     //商品管理路由
     Route::match(['get','post'],'goods/index', ['as' => 'admin.goods.index', 'uses' => 'GoodsController@index']);  //商品列表
     Route::match(['get','post'],'goods/upload', ['as' => 'admin.goods.upload', 'uses' => 'GoodsController@upload']);//上传图片
-    Route::match(['get','post'],'goods/skuStatus/{product_id}', ['as' => 'admin.goods.skuStatus', 'uses' => 'GoodsController@skuStatus'])->where(['product_id' => '[0-9]+']);//更改sku状态
-
+    Route::match(['get','post'],'goods/skuStatus/{product_id}/{status}', ['as' => 'admin.goods.skuStatus', 'uses' => 'GoodsController@skuStatus']);//更改sku状态
+ 
     Route::match(['get','post'],'goods/edit/{goods_id?}', ['as' => 'admin.goods.edit', 'uses' => 'GoodsController@edit'])->where(['goods_id' => '[0-9]+']);
     Route::match(['get','post'],'goods/changeStatus/{goods_id}/{status}', ['as' => 'admin.goods.changeStatus', 'uses' => 'GoodsController@changeStatus'])->where(['goods_id' => '[0-9]+','status' => '[0-2]']);
     Route::match(['get','post'],'goods/sjStatus/{goods_id}/{sj}', ['as' => 'admin.goods.sjStatus', 'uses' => 'GoodsController@sjStatus'])->where(['goods_id' => '[0-9]+','sj' => '[0-1]']);
+
     Route::match(['get','post'],'goods/add', ['as' => 'admin.goods.add', 'uses' => 'GoodsController@add']);//商品添加
     Route::match(['get','post'],'goods/getSpecValues', ['as' => 'admin.goods.getSpecValues', 'uses' => 'GoodsController@getSpecValues']);//ajax根据规格名获取规格值
     Route::match(['get','post'],'goods/generateSKU', ['as' => 'admin.goods.generateSKU', 'uses' => 'GoodsController@generateSKU']);//ajax根据规格名获取规格值
+	
+	
 
     //订单管理
     Route::match(['get','post'],'order/index', ['as' => 'admin.order.index', 'uses' => 'OrderController@index']);
     Route::match(['get','post'],'order/info/{order_id?}', ['as' => 'admin.order.info', 'uses' => 'OrderController@info'])->where(['order_id' => '[0-9]+']);
-
+    Route::match(['get','post'],'order/going/{order_id}/{status}', ['as' => 'admin.order.going', 'uses' => 'OrderController@going'])->where(['order_id' => '[0-9]+','status'=>'[0-4]']);
+     Route::match(['get','post'],'order/changego', ['as' => 'admin.order.changego', 'uses' => 'OrderController@changego']);
     //商品规格管理
     Route::match(['get','post'],'goods_spec/index', ['as' => 'admin.goods_spec.index', 'uses' => 'GoodsSpecController@index']);  // 商品规格列表
     Route::match(['get','post'],'goods_spec/add', ['as' => 'admin.goods_spec.add', 'uses' => 'GoodsSpecController@add']);  // 商品规格add
@@ -110,6 +116,13 @@ Route::group(['middleware' => ['auth:admin', 'menu', 'authAdmin']], function () 
     Route::match(['get','post'],'goods_cat/getChildCat', ['as' => 'admin.goods_cat.getChildCat', 'uses' => 'GoodsCatController@getChildCat']);//获取子分类
     Route::match(['get','post'],'goods_cat/edit/{id?}', ['as' => 'admin.goods_cat.edit', 'uses' => 'GoodsCatController@edit'])->where(['id' => '[0-9]+']);
     Route::match(['get','post'],'goods_cat/changeStatus/{id}/{status}', ['as' => 'admin.goods_cat.changeStatus', 'uses' => 'GoodsCatController@changeStatus'])->where(['id' => '[0-9]+','status' => '[0-2]']);
+
+    //财务管理路由
+    Route::match(['get','post'],'finance/index', ['as' => 'admin.finance.index', 'uses' => 'FinanceController@index']);//财务列表
+    Route::match(['get','post'],'finance/ScorelockIndex', ['as' => 'admin.finance.ScorelockIndex', 'uses' => 'FinanceController@ScorelockIndex']);//红人圈列表
+    Route::match(['get','post'],'finance/ScorelockEdit/{id?}', ['as' => 'admin.finance.ScorelockEdit', 'uses' => 'FinanceController@ScorelockEdit']);//红人圈编辑页面
+    Route::match(['get','post'],'finance/ScorelockUpdate/{id?}', ['as' => 'admin.finance.ScorelockUpdate', 'uses' => 'FinanceController@ScorelockUpdate']);//初审
+    Route::match(['get','post'],'finance/ScorelockUp/{id?}', ['as' => 'admin.finance.ScorelockUp', 'uses' => 'FinanceController@ScorelockUp']);//终审
 
 });
 

@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Http\Controllers\BaseController;
 use App\Models\Admin\OrderModel;
+use App\Models\Admin\MessageModel as MessageModel;
+use Illuminate\Support\Facades\DB;
+
 //订单管理
 class OrderController extends BaseController
 {
@@ -18,6 +21,8 @@ class OrderController extends BaseController
         2 => '待收货',
         3 => '已完成',
         4 => '已取消',
+        5 => '已删除',
+        6 => '超时关闭',
     ];
 
     public function __construct()
@@ -41,10 +46,10 @@ class OrderController extends BaseController
 
         if(!empty($keywords)){//订单编号，用户信息
             $pages['keywords'] = $keywords;
-            $where .= " and ( concat(orders.order_sn,users.username) like '%{$keywords}%'   ) ";
+            $where .= " and ( concat(orders.order_id,users.username) like '%{$keywords}%'   ) ";
         }
         $pages['page'] = isset($page) ? $page : 1;
-        $links = $this->model->join("users","users.id","=","orders.user_id")->whereRaw($where)->orderBy('order_id','desc')->paginate($this->page_size)->appends($pages);
+        $links = $this->model->join("users","users.id","=","orders.user_id")->whereRaw($where)->orderBy('order_id','desc')->paginate($this->page_size)->appends($pages); 
 
         $data['data'] = $links;
         $data['page'] = $pages;
@@ -225,4 +230,49 @@ class OrderController extends BaseController
         $res =  \DB::table('goods_cat')->whereRaw($where)->first();
         return $res->cat_path;
     }
+
+    /**
+     * 订单详情
+     */
+    public function info(Request $request){
+        $order_id = $request->order_id ? $request->order_id : 0;
+        $data = \DB::table('orders')->join("users","users.id","=","orders.user_id")->join("orders_detail","orders_detail.order_id","=","orders.order_id")->where(['orders.order_id'=>$order_id])->get();
+        return view('admin.order.info',['data'=>$data]);
+    }
+
+    /**
+     * 发货
+     */
+    public function going(Request $request){
+        $order_id = $request->order_id ? $request->order_id : NULL;
+        $status = $request->status ? $request->status : NULL;
+        $links = $this->model->join("users","users.id","=","orders.user_id")->orderBy('order_id','desc')->first();
+        return view('admin.order.going',['order_id'=>$order_id,'status'=>$status, 'user_id'=>$links->user_id, 'total_score'=>$links->total_score]);
+    }
+
+    /**
+     * 修发货状态
+     * @param Request $request->wuliu_name  快递公司
+     * @param Request $request->wuliu_code  物流单号
+     * @param Request $request->fahuo_time   发货时间
+     * @param Request $request->update_time   订单修改时间
+     * @param Request $request->order_status   订单状态
+     * @return true 操作成功
+     */
+    public function changego(Request $request){
+        $order_id = $request->order_id ? $request->order_id : NULL;
+        $data['wuliu_name'] = $request->wuliu_name ? $request->wuliu_name : NULL;//快递公司
+        $data['wuliu_code'] = $request->wuliu_code ? $request->wuliu_code : NULL;//物流单号
+        $data['fahuo_time'] = time();//发货时间
+        $data['update_time'] = time();//更新时间
+        $data['order_status'] = 2;
+        $res = OrderModel::updateOneOrder($order_id,$data);
+         if($res){
+             MessageModel::addMessage($request->user_id, "兑换商品已发货", "您的订单号{$request->order_id}成功支付红人圈{$request->total_score}，我们已为您发货，请及时确认收货！");
+             return redirect('admin/order/index')->withSuccess('操作成功！');
+         }else{
+             return redirect('admin/order/index')->withSuccess('操作失败！');
+         }
+    }
+
 }
