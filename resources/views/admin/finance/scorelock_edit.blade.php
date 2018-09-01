@@ -20,11 +20,11 @@
 
                             @include('admin.partials.errors')
                             @include('admin.partials.success')
-                            @if(Gate::forUser(auth('admin')->user())->check('admin.finance.ScorelockUpdate') && $data->status == 0 )
-                            <form class="form-horizontal"   method="POST" action="{{url('admin/finance/ScorelockUpdate')}}">
+                            @if(Gate::forUser(auth('admin')->user())->check('admin.finance.scorelockUpdate') && $data->status == 0 )
+                            <form class="form-horizontal"   method="POST" action="{{url('admin/finance/scorelockUpdate')}}">
                             @endif
                             @if(Gate::forUser(auth('admin')->user())->check('admin.finance.ScorelockUp') && $data->status == 1 )
-                            <form class="form-horizontal"   method="POST" action="{{url('admin/finance/ScorelockUp')}}">
+                            <form class="form-horizontal"   method="POST" action="{{url('admin/finance/scorelockUp')}}">
                             @endif
                                 <input type="hidden" name="_token" value="{{ csrf_token() }}">
                                 <input type="hidden" name="scorelock_id" value="{{ $data->id }}">
@@ -75,11 +75,11 @@
                                         <label class="col-sm-3 control-label">状态</label>
                                         <div class="col-sm-4">
                                                 <select class="form-control"  style="margin-left:-6%;" id="status" name="status"  tabindex="-1" aria-hidden="true">
-                                                    @if(Gate::forUser(auth('admin')->user())->check('admin.finance.ScorelockEdit') && $data->status == 0 )
+                                                    @if(Gate::forUser(auth('admin')->user())->check('admin.finance.scorelockEdit') && $data->status == 0 )
                                                         <option value="1"  @if(isset($data->status) && $data->status == 1) selected="selected" @endif >初审通过</option>
                                                         <option value="-1"  @if(isset($data->status) && $data->status == -1) selected="selected" @endif >初审未通过</option>
                                                     @endif
-                                                    @if(Gate::forUser(auth('admin')->user())->check('admin.finance.ScorelockEdit') && $data->status == 1 )
+                                                    @if(Gate::forUser(auth('admin')->user())->check('admin.finance.scorelockEdit') && $data->status == 1 )
                                                         <option value="2"  @if(isset($data->status) && $data->status == 2) selected="selected" @endif >终审通过</option>
                                                         <option value="-2"  @if(isset($data->status) && $data->status == -2) selected="selected" @endif >终审未通过</option>
                                                     @endif
@@ -141,7 +141,7 @@
                                         <button type="submit" class="btn layui-btn">
                                             <i class="fa fa-plus-circle"></i>提交
                                         </button>
-                                        <button type="button"  class="btn layui-btn" onclick="location.href='{{url('admin/finance/ScorelockIndex')}}'">
+                                        <button type="button"  class="btn layui-btn" onclick="location.href='{{url('admin/finance/scorelockIndex')}}'">
                                             <i class="fa fa-mail-reply-all"></i>返回上级
                                         </button>
                                     </div>

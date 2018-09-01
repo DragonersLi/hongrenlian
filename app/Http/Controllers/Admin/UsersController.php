@@ -123,7 +123,7 @@ class UsersController extends BaseController
      * @param Request $request->title  红人圈描述
      * @return mixed
      */
-    public function AddScorelock(Request $request){
+    public function addScorelock(Request $request){
 
         if($request->isMethod('post')) {
                 $scorelock = array();//红人圈总类声明

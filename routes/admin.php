@@ -75,7 +75,7 @@ Route::group(['middleware' => ['auth:admin', 'menu', 'authAdmin']], function () 
     Route::match(['get','post'],'users/changeStatus/{id}/{status}', ['as' => 'admin.users.changeStatus', 'uses' => 'UsersController@changeStatus'])->where(['id' => '[0-9]+','status' => '[0-2]']);
     Route::match(['get','post'],'users/address/{uid?}', ['as' => 'admin.users.address', 'uses' => 'UsersController@address'])->where(['uid' => '[0-9]+']); // 收货地址列表(['goods_id' => '[0-9]+','sj' => '[0-1]']);
     Route::match(['get','post'],'users/scorelock/{id?}', ['as' => 'admin.users.scorelock', 'uses' => 'UsersController@scorelock'])->where(['id' => '[0-9]+']); //获取红人圈基本信息
-    Route::match(['get','post'],'users/AddScorelock', ['as' => 'admin.users.AddScorelock', 'uses' => 'UsersController@AddScorelock']); //添加红人圈
+    Route::match(['get','post'],'users/addScorelock', ['as' => 'admin.users.addScorelock', 'uses' => 'UsersController@addScorelock']); //添加红人圈
     //粉丝管理路由
     Route::match(['get','post'],'fans/index', ['as' => 'admin.fans.index', 'uses' => 'FansController@index']);  //粉丝管理
     Route::match(['get','post'],'fans/upload', ['as' => 'admin.fans.upload', 'uses' => 'FansController@upload']);//上传头像
@@ -102,7 +102,7 @@ Route::group(['middleware' => ['auth:admin', 'menu', 'authAdmin']], function () 
     Route::match(['get','post'],'order/index', ['as' => 'admin.order.index', 'uses' => 'OrderController@index']);
     Route::match(['get','post'],'order/info/{order_id?}', ['as' => 'admin.order.info', 'uses' => 'OrderController@info'])->where(['order_id' => '[0-9]+']);
     Route::match(['get','post'],'order/going/{order_id}/{status}', ['as' => 'admin.order.going', 'uses' => 'OrderController@going'])->where(['order_id' => '[0-9]+','status'=>'[0-4]']);
-     Route::match(['get','post'],'order/changego', ['as' => 'admin.order.changego', 'uses' => 'OrderController@changego']);
+    Route::match(['get','post'],'order/changego', ['as' => 'admin.order.changego', 'uses' => 'OrderController@changego']);
     //商品规格管理
     Route::match(['get','post'],'goods_spec/index', ['as' => 'admin.goods_spec.index', 'uses' => 'GoodsSpecController@index']);  // 商品规格列表
     Route::match(['get','post'],'goods_spec/add', ['as' => 'admin.goods_spec.add', 'uses' => 'GoodsSpecController@add']);  // 商品规格add
@@ -119,10 +119,13 @@ Route::group(['middleware' => ['auth:admin', 'menu', 'authAdmin']], function () 
 
     //财务管理路由
     Route::match(['get','post'],'finance/index', ['as' => 'admin.finance.index', 'uses' => 'FinanceController@index']);//财务列表
-    Route::match(['get','post'],'finance/ScorelockIndex', ['as' => 'admin.finance.ScorelockIndex', 'uses' => 'FinanceController@ScorelockIndex']);//红人圈列表
-    Route::match(['get','post'],'finance/ScorelockEdit/{id?}', ['as' => 'admin.finance.ScorelockEdit', 'uses' => 'FinanceController@ScorelockEdit']);//红人圈编辑页面
-    Route::match(['get','post'],'finance/ScorelockUpdate/{id?}', ['as' => 'admin.finance.ScorelockUpdate', 'uses' => 'FinanceController@ScorelockUpdate']);//初审
-    Route::match(['get','post'],'finance/ScorelockUp/{id?}', ['as' => 'admin.finance.ScorelockUp', 'uses' => 'FinanceController@ScorelockUp']);//终审
+    Route::match(['get','post'],'finance/scorelockIndex', ['as' => 'admin.finance.scorelockIndex', 'uses' => 'FinanceController@scorelockIndex']);//红人圈列表
+    Route::match(['get','post'],'finance/scorelockEdit/{id?}', ['as' => 'admin.finance.scorelockEdit', 'uses' => 'FinanceController@scorelockEdit']);//红人圈编辑页面
+    Route::match(['get','post'],'finance/scorelockUpdate/{id?}', ['as' => 'admin.finance.scorelockUpdate', 'uses' => 'FinanceController@scorelockUpdate']);//初审
+    Route::match(['get','post'],'finance/scorelockUp/{id?}', ['as' => 'admin.finance.scorelockUp', 'uses' => 'FinanceController@scorelockUp']);//终审
+    Route::match(['get','post'],'finance/incomeType', ['as' => 'admin.finance.incomeType', 'uses' => 'FinanceController@incomeType']);//ajax 二级联动type 收支列表页
+    Route::match(['get','post'],'finance/frozenIndex', ['as' => 'admin.finance.frozenIndex', 'uses' => 'FinanceController@frozenIndex']);//财务 冻结列表
+    Route::match(['get','post'],'finance/frozenUp/{id?}/{mobile?}/{user_id?}/{number?}', ['as' => 'admin.finance.frozenUp', 'uses' => 'FinanceController@frozenUp']);//
 
 });
 

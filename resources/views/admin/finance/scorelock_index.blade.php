@@ -13,13 +13,13 @@
         </div>
         <div class="box-body">
             <div class="row">
-                <form action="{{url('admin/finance/ScorelockIndex')}}" method="post">
+                <form action="{{url('admin/finance/scorelockIndex')}}" method="post">
                     <div class="col-lg-2">
                         <input type="text"  name="keywords"  value="{{$page['keywords'] or ''}}"  class="form-control" placeholder="请输入用户名搜索" />
                     </div>
                     <div class="col-lg-2" style="width: 10%;" >
                         <select class="form-control"  id="status" name="status"  tabindex="-1" aria-hidden="true">
-                            @if(Gate::forUser(auth('admin')->user())->check('admin.finance.ScorelockUp'))
+                            @if(Gate::forUser(auth('admin')->user())->check('admin.finance.scorelockUp'))
                             <option value="1"  @if(isset($page['status']) && $page['status'] == 1) selected="selected" @endif >初审</option>
                             <option value="0">未审核</option>
                             @else
@@ -41,7 +41,7 @@
                     <div class="col-lg-2">
                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
                         <button type="submit" class="btn btn-default">搜索</button>
-                        <button type="button" style="margin-left:5px;" class="btn btn-default" onclick="location.href='{{ url('admin/finance/ScorelockIndex') }}'">重置</button>
+                        <button type="button" style="margin-left:5px;" class="btn btn-default" onclick="location.href='{{ url('admin/finance/scorelockIndex') }}'">重置</button>
                     </div>
                 </form>
 
@@ -98,27 +98,27 @@
                                     @endif
                                 </th>
                                 <th data-sortable="false">
-                                    @if(Gate::forUser(auth('admin')->user())->check('admin.finance.ScorelockUpdate') && $v->status == 0 )
-                                        <a href="{{url('admin/finance/ScorelockEdit',['id'=>$v->id])}}" class="btn btn-success">
+                                    @if(Gate::forUser(auth('admin')->user())->check('admin.finance.scorelockUpdate') && $v->status == 0 )
+                                        <a href="{{url('admin/finance/scorelockEdit',['id'=>$v->id])}}" class="btn btn-success">
                                             <i class="fa"></i> 去审核
                                         </a>
                                     @endif
-                                    @if(Gate::forUser(auth('admin')->user())->check('admin.finance.ScorelockUp') && $v->status == 1 )
-                                            <a href="{{url('admin/finance/ScorelockEdit',['id'=>$v->id])}}" class="layui-btn layui-btn-normal">
+                                    @if(Gate::forUser(auth('admin')->user())->check('admin.finance.scorelockUp') && $v->status == 1 )
+                                            <a href="{{url('admin/finance/scorelockEdit',['id'=>$v->id])}}" class="layui-btn layui-btn-normal">
                                                 <i class="fa"></i> 初审通过
                                             </a>
                                     @endif
-                                    @if(Gate::forUser(auth('admin')->user())->check('admin.finance.ScorelockUp') && $v->status == 2 )
+                                    @if(Gate::forUser(auth('admin')->user())->check('admin.finance.scorelockUp') && $v->status == 2 )
                                             <button class="btn" disabled>
                                                 <i class="fa"></i> 终审通过
                                             </button>
                                     @endif
-                                    @if(Gate::forUser(auth('admin')->user())->check('admin.finance.ScorelockUpdate') && $v->status == -1 )
+                                    @if(Gate::forUser(auth('admin')->user())->check('admin.finance.scorelockUpdate') && $v->status == -1 )
                                             <button class="btn btn-danger" disabled>
                                                 <i class="fa"></i> 初核未通过
                                             </button>
                                     @endif
-                                    @if(Gate::forUser(auth('admin')->user())->check('admin.finance.ScorelockUp') && $v->status == -2 )
+                                    @if(Gate::forUser(auth('admin')->user())->check('admin.finance.scorelockUp') && $v->status == -2 )
                                             <button class="btn btn-danger" disabled>
                                                 <i class="fa"></i> 终审未通过
                                             </button>
@@ -148,7 +148,6 @@
     </div>
     </div>
 @stop
-
 <link rel="stylesheet" type="text/css" href="/layui/css/layui.css" /> <!-- lay上传插件样式 -->
 <script src="/plugins/laydate/laydate.js"></script> <!-- 改成你的路径 -->
 <script type="application/javascript">

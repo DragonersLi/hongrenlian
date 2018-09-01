@@ -21,7 +21,7 @@
                             @include('admin.partials.errors')
                             @include('admin.partials.success')
 
-                            <form class="form-horizontal"   method="POST" action="{{url('admin/users/AddScorelock')}}">
+                            <form id="defaultForm" class="form-horizontal"   method="POST" action="{{url('admin/users/addScorelock')}}">
                                 <input type="hidden" name="_token" value="{{ csrf_token() }}">
                                 <div class="col-md-6">
                                     <div class="form-group avatar-picker">
@@ -68,7 +68,7 @@
                                         <label class="col-sm-3 control-label">所需红人圈</label>
                                         <div class="input-group">
                                             <span class="input-group-addon">￥</span>
-                                            <input style="width: 25%; text-align: right;" id="score" name="score" value="" class="form-control" placeholder="红人圈" type="text">
+                                            <input style="width: 25%; text-align: right;" id="score" name="score" value="" class="form-control" placeholder="必填项" class="input-xlarge" required="required"  placeholder="红人圈" type="text" >
                                         </div>
                                     </div>
                                     <!--所需红人圈-->
@@ -77,7 +77,6 @@
                                     <div class="form-group">
                                         <label class="col-sm-3 control-label">   分配红人圈  </label>
                                         <input  type="button" class="layui-btn  layui-btn-normal"  name="button" id="attr_create" value="新增属性">
-
                                     </div>
                                     <div class="form-group">
                                         <label class="col-sm-3 control-label"></label>
@@ -87,8 +86,8 @@
                                                     @if(!empty($data['attr']))
                                                         @foreach($data['attr'] as $k=>$v)
                                                             <li style="margin:5px;">
-                                                                红人圈：<input name="attr[key]" type="text" class="form-control"   size="24"   value="{{$v['keys']}}" placeholder="红人圈"   style="width:150px;height:30px;display:inline;"/>&nbsp;&nbsp;&nbsp;&nbsp;
-                                                                冻结天数：<input name="attr[val]" type="text" class="form-control"   size="24"  value="{{$v['days']}}"  placeholder="冻结天数"   style="width:150px;height:30px;display:inline;"/>&nbsp;&nbsp;&nbsp;&nbsp;
+                                                                红人圈：<input name="attr[key]" type="text" class="form-control" required="required" id="key" size="24"   value="{{$v['keys']}}" placeholder="红人圈"   style="width:150px;height:30px;display:inline;"/>&nbsp;&nbsp;&nbsp;&nbsp;
+                                                                冻结天数：<input name="attr[val]" type="text" class="form-control" required="required" id="val" size="24"  value="{{$v['days']}}"  placeholder="冻结天数"   style="width:150px;height:30px;display:inline;"/>&nbsp;&nbsp;&nbsp;&nbsp;
                                                                 <input type="button" class="layui-btn" value="删除"   onclick="deleteAttr(this)"   style="cursor:pointer">
                                                             </li>
                                                         @endforeach
@@ -139,6 +138,18 @@
         -webkit-border-radius: 50%;
         border: 2px solid #44576B;
     }
+
+    .valierror {
+        border-color: red !important;
+    }
+
+    .tooltip.right .tooltip-arrow {
+        border-right-color: #d15b47;
+    }
+
+    .tooltip-inner {
+        background-color: #d15b47;
+    }
 </style>
 <script type="text/javascript">
     $(function(){
@@ -152,9 +163,11 @@
 
             $("#attr").append(attr);
         });
+
     });
     //删除属性
     function deleteAttr(attr) {
         $(attr).parent().remove();
     }
+
 </script>
